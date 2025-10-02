@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Node
+node_modules/
+dist/
+*.log
+
+# Data (keep this local!)
+data/audio/*
+data/clusters/*
+data/db.sqlite
+data/faiss.index
+
+# OS cruft
+.DS_Store
+Thumbs.db
