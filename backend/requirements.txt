@@ -1,15 +1,15 @@
 # Core backend
-fastapi==0.111.0
-uvicorn[standard]==0.30.0
+fastapi==0.118.0
+uvicorn[standard]==0.37.0
 
 # Database
-sqlalchemy==2.0.30
+sqlalchemy==2.0.43
 
 # Vector search
-faiss-cpu==1.8.0
+faiss-cpu==1.12.0
 
 # Utils
-numpy==1.26.4
+numpy==2.3.0
 
 # Optional: if you want to interact with SQLite more comfortably
-aiosqlite==0.20.0
+aiosqlite==0.21.0
