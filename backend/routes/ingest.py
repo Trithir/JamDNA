@@ -7,7 +7,13 @@ import os
 
 router = APIRouter()
 
-AUDIO_FOLDER = "data/audio"
+# Resolve audio folder relative to the repository root so the backend works
+# regardless of the process working directory (frontend start vs running backend directly).
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+AUDIO_FOLDER = os.path.join(REPO_ROOT, "data", "audio")
+
+# Ensure the audio folder exists to avoid FileNotFoundError during ingest.
+os.makedirs(AUDIO_FOLDER, exist_ok=True)
 
 @router.post("/")
 def ingest_tracks():

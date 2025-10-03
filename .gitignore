@@ -21,3 +21,6 @@ Thumbs.db
 
 # Pip bootstrap
 backend/get-pip.py
+
+# vsc
+.vscode/

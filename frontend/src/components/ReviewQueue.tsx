@@ -47,8 +47,15 @@ function ReviewQueue() {
     const cl = await listClusters();
     setClusters(cl.clusters);
 
-    const allTracks: Track[] = cl.clusters.flatMap((c: Cluster) => c.members);
-    const unclustered = allTracks.filter(t => !t.cluster_id);
+    // Prefer backend-provided `unclustered` list when available (newer backend).
+    // Fallback to deriving it from clusters for older backends.
+    let unclustered: Track[] = [];
+    if ((cl as any).unclustered) {
+      unclustered = (cl as any).unclustered;
+    } else {
+      const allTracks: Track[] = cl.clusters.flatMap((c: Cluster) => c.members);
+      unclustered = allTracks.filter(t => !t.cluster_id);
+    }
     setQueue(unclustered);
 
     setLoading(false);

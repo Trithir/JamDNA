@@ -17,8 +17,8 @@ def create_cluster(name: str):
 @router.post("/assign")
 def assign_track(track_id: int, cluster_id: int):
     session: Session = next(get_session())
-    track = session.query(Track).get(track_id)
-    cluster = session.query(Cluster).get(cluster_id)
+    track = session.get(Track, track_id)
+    cluster = session.get(Cluster, cluster_id)
 
     if not track:
         raise HTTPException(status_code=404, detail="Track not found")
@@ -38,7 +38,7 @@ def assign_track(track_id: int, cluster_id: int):
 @router.post("/rename")
 def rename_cluster(cluster_id: int, new_name: str):
     session: Session = next(get_session())
-    cluster = session.query(Cluster).get(cluster_id)
+    cluster = session.get(Cluster, cluster_id)
 
     if not cluster:
         raise HTTPException(status_code=404, detail="Cluster not found")
@@ -67,4 +67,11 @@ def list_clusters():
             "name": c.name,
             "members": members
         })
-    return {"clusters": data}
+    # Also include tracks that are not assigned to any cluster so the
+    # frontend can show a review queue without reconstructing from clusters.
+    unclustered_q = session.query(Track).filter(Track.cluster_id == None).all()
+    unclustered = [
+        {"id": t.id, "path": t.path, "duration": t.duration, "cluster_id": None}
+        for t in unclustered_q
+    ]
+    return {"clusters": data, "unclustered": unclustered}
