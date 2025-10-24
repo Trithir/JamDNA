@@ -59,3 +59,7 @@ export async function renameCluster(clusterId: number, newName: string) {
 export async function listClusters() {
   return getJSON("/cluster/list");
 }
+
+export async function getClusterCoords() {
+  return getJSON("/cluster/coords");
+}

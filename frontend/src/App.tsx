@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ReviewQueue from "./components/ReviewQueue";
 import ClusterList from "./components/ClusterList";
+import ClusterChart from "./components/ClusterChart";
 
 function App() {
   const [tab, setTab] = useState<"review" | "clusters">("review");
@@ -32,7 +33,18 @@ function App() {
         </button>
       </div>
 
-      {tab === "review" && <ReviewQueue />}
+      {tab === "review" && (
+        <div style={{ display: "flex", gap: "1rem", height: "70vh" }}>
+          <div style={{ width: "50%", overflowY: "auto", paddingRight: "0.5rem" }}>
+            <ReviewQueue />
+          </div>
+          <div style={{ width: "50%", borderLeft: "1px solid #ddd", paddingLeft: "0.5rem", overflow: "hidden" }}>
+            {/* Chart stays visible while the left pane scrolls */}
+            <ClusterChart />
+          </div>
+        </div>
+      )}
+
       {tab === "clusters" && <ClusterList />}
     </div>
   );

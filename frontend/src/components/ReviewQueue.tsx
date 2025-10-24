@@ -144,7 +144,7 @@ function ReviewQueue() {
                   <p>
                     Track #{n.track_id} (distance: {n.distance.toFixed(3)})
                   </p>
-                  <AudioPlayer trackId={track.id} />
+                  <AudioPlayer trackId={n.track_id} />
                 </div>
               ))}
             </div>

@@ -3,6 +3,11 @@ from sqlalchemy.orm import Session
 from db import get_session
 from models import Cluster, Track
 from utils.fileops import move_track_to_cluster, rename_cluster_folder
+from sqlalchemy.orm import Session
+from db import get_session
+from models import Track
+import numpy as np
+from . import query as query_routes
 
 router = APIRouter()
 
@@ -75,3 +80,68 @@ def list_clusters():
         for t in unclustered_q
     ]
     return {"clusters": data, "unclustered": unclustered}
+
+
+@router.get("/coords")
+def cluster_coords():
+    """Return a simple 2D projection (PCA) for all tracks.
+
+    Response: { "points": [ {id, x, y, cluster_id, path}, ... ] }
+    """
+    session: Session = next(get_session())
+    tracks = session.query(Track).all()
+
+    # Build vectors using fp_to_vec from query module
+    vecs = []
+    ids = []
+    cluster_ids = []
+    paths = []
+    for t in tracks:
+        try:
+            v = query_routes.fp_to_vec(t.fingerprint, dim=128).reshape(-1)
+        except Exception:
+            # fallback: zeros
+            v = np.zeros(128, dtype=np.float32)
+        vecs.append(v)
+        ids.append(t.id)
+        cluster_ids.append(t.cluster_id)
+        paths.append(t.path)
+
+    if len(vecs) == 0:
+        return {"points": []}
+
+    mat = np.vstack(vecs).astype(np.float32)
+
+    # Center and compute PCA (SVD)
+    mat_centered = mat - mat.mean(axis=0)
+    try:
+        u, s, vh = np.linalg.svd(mat_centered, full_matrices=False)
+        coords = u[:, :2] * s[:2]
+    except Exception:
+        # if SVD fails, use first two dims
+        coords = mat_centered[:, :2]
+
+    # Normalize to a -1..1 range for x and y
+    xs = coords[:, 0]
+    ys = coords[:, 1]
+    def norm(a):
+        mn = a.min()
+        mx = a.max()
+        if mx - mn == 0:
+            return np.zeros_like(a)
+        return (2 * (a - mn) / (mx - mn)) - 1
+
+    xs_n = norm(xs)
+    ys_n = norm(ys)
+
+    points = []
+    for i, tid in enumerate(ids):
+        points.append({
+            "id": int(tid),
+            "x": float(xs_n[i]),
+            "y": float(ys_n[i]),
+            "cluster_id": (int(cluster_ids[i]) if cluster_ids[i] is not None else None),
+            "path": paths[i],
+        })
+
+    return {"points": points}
