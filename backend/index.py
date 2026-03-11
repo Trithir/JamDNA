@@ -2,12 +2,17 @@ import faiss
 import numpy as np
 
 class Index:
-    def __init__(self, dim=128):
-        self.index = faiss.IndexFlatL2(dim)
 
-    def add(self, vecs):
-        self.index.add(vecs.astype("float32"))
+	def __init__(self, dim=256):
+		self.index = faiss.IndexFlatIP(dim)
 
-    def search(self, vec, k=5):
-        D, I = self.index.search(vec.astype("float32"), k)
-        return D, I
+	def add(self, vecs):
+		vecs = vecs.astype("float32")
+		faiss.normalize_L2(vecs)
+		self.index.add(vecs)
+
+	def search(self, vec, k=5):
+		vec = vec.astype("float32")
+		faiss.normalize_L2(vec)
+		D, I = self.index.search(vec, k)
+		return D, I

@@ -21,10 +21,11 @@ Everything runs **locally** — no cloud services, no data collection.
 
 Before setup, make sure you have these installed on your system:
 
+- **Visual Studio build tools** 
 - **Python** 3.10+  
-- **Node.js** 18+ (comes with `npm`)  
+- **Node.js** 18+ (comes with `npm`) 
 - **ffmpeg** (for audio decoding/streaming)  
-- **Chromaprint (fpcalc)** (for audio fingerprinting)
+- **Chromaprint (fpcalc)** (for audio fingerprinting) https://acoustid.org/chromaprint
 
 ### Install system dependencies
 
@@ -47,7 +48,7 @@ cd jamdna
 **Backend setup**
 cd backend
 python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
+source venv/bin/activate   # Windows bash: source venv/Scripts/activate
 pip install -r requirements.txt
 
 **Frontend setup**
@@ -63,6 +64,12 @@ npm run fullstack
 Backend → http://localhost:8000
 
 Frontend → http://localhost:5173
+
+Alternatively run two terminals both cd frontend:
+
+npm run dev
+
+npm run backend
 
 **Usage**
 Place audio files (WAV, FLAC, MP3, etc.) in data/audio/.

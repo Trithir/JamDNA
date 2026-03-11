@@ -1,24 +1,33 @@
-from sqlalchemy import create_engine
+from pathlib import Path
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from models import Base
 
-# Path to your SQLite DB (will be created if missing)
-DATABASE_URL = "sqlite:///../data/db.sqlite"
+BACKEND_DIR = Path(__file__).resolve().parent
+REPO_ROOT = BACKEND_DIR.parent
+DATA_DIR = REPO_ROOT / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+DATABASE_PATH = DATA_DIR / "db.sqlite"
+DATABASE_URL = f"sqlite:///{DATABASE_PATH.as_posix()}"
 
-# SQLAlchemy engine & session factory
 engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}  # needed for SQLite + FastAPI
+	DATABASE_URL,
+	connect_args={"check_same_thread": False}
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create tables if they don’t exist
 Base.metadata.create_all(bind=engine)
 
-# Dependency for FastAPI routes
+# Lightweight schema upgrade for older DBs.
+with engine.begin() as conn:
+	columns = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(tracks)").fetchall()}
+	if "embedding" not in columns:
+		conn.execute(text("ALTER TABLE tracks ADD COLUMN embedding TEXT"))
+
+
 def get_session():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+	db = SessionLocal()
+	try:
+		yield db
+	finally:
+		db.close()
